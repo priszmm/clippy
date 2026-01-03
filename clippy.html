@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>$CLIPPY - It looks like you're trying to buy a memecoin...</title>
+    <link href="https://fonts.googleapis.com/css2?family=MS+Sans+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: 'MS Sans Serif';
+            src: url('data:font/woff2;base64,d09GMgABAAAAAAZQAA0AAAAAC2QAAAYBAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGhYbEBwaBmAAgTIRCAqHHIV6CwwAATYCJAMQBCAFgxIHIBvSCREVnHvIfiZMN9WJGGwEE/Y+dSJqNPH8x3579rn30x/xKp6M5+kk0YglQiSREDwkWiNrJkSxSn5z23//29C0OPxpPBIajSSS0QqJBJWZUIhkj0bqvq/Wf/o/3/N/aFf77jc2ipdDJY6nwRRYNbAAtFtABRbkDjjy1gT6AEZwAXO8jzMAOwAHsJcADuAuARzAowRwAI8SwAE8TgAHMBHAARglgAMYJYADmEsABzCXAA5gLgEcwFwCOIC5BHAA8wjgAOYRwAHMI4ADmEcABzCPAA5gHgEcwDwCOIB5BHAA8wjgAOYRwAHMI4ADmEcA') format('woff2');
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --win97-grey: #c0c0c0;
+            --win97-darkgrey: #808080;
+            --win97-blue: #000080;
+            --win97-lightblue: #0000ff;
+            --clippy-green: #00ff00;
+            --clippy-yellow: #ffff00;
+        }
+
+        body {
+            font-family: 'MS Sans Serif', 'Courier New', monospace;
+            background: #008080;
+            color: #000;
+            overflow-x: hidden;
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path d="M0,0 L0,12 L4,9 L6,14 L8,13 L6,8 L10,8 Z" fill="black"/><path d="M1,1 L1,10 L4,8 L5.5,12 L6.5,11.5 L5,7 L9,7 Z" fill="white"/></svg>'), auto;
+        }
+
+        /* Windows 97 Desktop Background */
+        .desktop {
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Window Chrome */
+        .window {
+            background: var(--win97-grey);
+            border: 2px solid;
+            border-color: #fff #000 #000 #fff;
+            box-shadow: 
+                inset 1px 1px 0 #dfdfdf,
+                inset -1px -1px 0 #808080,
+                2px 2px 10px rgba(0,0,0,0.4);
+            max-width: 900px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, var(--win97-blue), var(--win97-lightblue));
+            padding: 3px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .title-bar-text {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .title-bar-controls {
+            display: flex;
+            gap: 2px;
+        }
+
+        .title-bar-button {
+            width: 18px;
+            height: 16px;
+            background: var(--win97-grey);
+            border: 1px solid;
+            border-color: #fff #000 #000 #fff;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .title-bar-button:active {
+            border-color: #000 #fff #fff #000;
+        }
+
+        .window-body {
+            padding: 20px;
+        }
+
+        /* Clippy Assistant */
+        .clippy-assistant {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            z-index: 1000;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        .clippy-bubble {
+            background: var(--clippy-yellow);
+            border: 2px solid #000;
+            padding: 15px;
+            border-radius: 15px;
+            position: relative;
+            margin-bottom: 10px;
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .clippy-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -20px;
+            right: 30px;
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 0px solid transparent;
+            border-top: 20px solid var(--clippy-yellow);
+        }
+
+        .clippy-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -23px;
+            right: 30px;
+            width: 0;
+            height: 0;
+            border-left: 21px solid transparent;
+            border-right: 0px solid transparent;
+            border-top: 21px solid #000;
+        }
+
+        .clippy-character {
+            font-size: 80px;
+            text-align: center;
+            animation: wiggle 0.5s ease-in-out infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        /* Buttons */
+        .win-button {
+            background: var(--win97-grey);
+            border: 2px solid;
+            border-color: #fff #000 #000 #fff;
+            padding: 8px 24px;
+            font-family: 'MS Sans Serif', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: inset 1px 1px 0 #dfdfdf, inset -1px -1px 0 #808080;
+            min-width: 120px;
+        }
+
+        .win-button:active {
+            border-color: #000 #fff #fff #000;
+            box-shadow: inset -1px -1px 0 #dfdfdf, inset 1px 1px 0 #808080;
+        }
+
+        .win-button.primary {
+            border: 3px dotted #000;
+            outline: 1px solid var(--win97-grey);
+            outline-offset: -6px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: var(--win97-blue);
+            text-shadow: 2px 2px 0 var(--win97-darkgrey);
+        }
+
+        .logo {
+            font-size: 120px;
+            margin: 20px 0;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Annoying Popup */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 999;
+            display: none;
+        }
+
+        .popup.active {
+            display: block;
+            animation: popup-appear 0.3s ease-out;
+        }
+
+        @keyframes popup-appear {
+            from {
+                transform: translate(-50%, -50%) scale(0);
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Stats Grid */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .stat-box {
+            background: white;
+            border: 2px solid;
+            border-color: #808080 #fff #fff #808080;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--win97-blue);
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #000;
+        }
+
+        /* Scrolling Text */
+        .marquee-container {
+            background: var(--win97-blue);
+            color: white;
+            padding: 10px 0;
+            margin: 20px 0;
+            border: 2px solid;
+            border-color: #000 #fff #fff #000;
+            overflow: hidden;
+        }
+
+        .marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: scroll 20s linear infinite;
+            font-weight: bold;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Footer */
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--win97-grey);
+            border-top: 2px solid #fff;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+            z-index: 500;
+        }
+
+        .start-button {
+            background: var(--win97-grey);
+            border: 2px solid;
+            border-color: #fff #000 #000 #fff;
+            padding: 4px 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .start-button:active {
+            border-color: #000 #fff #fff #000;
+        }
+
+        .clock {
+            margin-left: auto;
+            padding: 4px 8px;
+            border: 1px solid;
+            border-color: #808080 #fff #fff #808080;
+            font-size: 12px;
+        }
+
+        /* Error Messages */
+        .error-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border-radius: 50%;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .message-box {
+            display: flex;
+            align-items: center;
+            background: var(--win97-grey);
+            padding: 20px;
+            border: 2px solid;
+            border-color: #fff #000 #000 #fff;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .clippy-assistant {
+                width: 150px;
+                bottom: 80px;
+                right: 10px;
+            }
+            
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .logo {
+                font-size: 80px;
+            }
+        }
+
+        /* Loading Bar */
+        .progress-bar {
+            background: white;
+            border: 2px solid;
+            border-color: #808080 #fff #fff #808080;
+            height: 24px;
+            padding: 2px;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: var(--win97-blue);
+            height: 100%;
+            width: 0%;
+            animation: progress 3s ease-in-out infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="desktop">
+        <!-- Main Window -->
+        <div class="window">
+            <div class="title-bar">
+                <div class="title-bar-text">
+                    <span>📎</span>
+                    <span>$CLIPPY - Microsoft Office Assistant (Not Responding)</span>
+                </div>
+                <div class="title-bar-controls">
+                    <button class="title-bar-button">_</button>
+                    <button class="title-bar-button">□</button>
+                    <button class="title-bar-button" onclick="alert('You cannot close Clippy. Clippy closes you.')">×</button>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="hero">
+                    <h1>$CLIPPY</h1>
+                    <div class="logo">📎</div>
+                    <p style="font-size: 18px; margin: 20px 0;">
+                        <strong>It looks like you're trying to buy a memecoin...</strong>
+                    </p>
+                    <p style="margin: 10px 0;">Would you like help with that?</p>
+                    <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <button class="win-button primary" onclick="showPopup()">• Buy $CLIPPY</button>
+                        <button class="win-button" onclick="showAdvice()">• Get Advice</button>
+                        <button class="win-button" onclick="alert('Searching for: How to uninstall Clippy\n\nError: Access Denied\n\nClippy is eternal.')">• Remove Assistant</button>
+                    </div>
+                </div>
+
+                <div class="marquee-container">
+                    <div class="marquee">
+                        📎 IT LOOKS LIKE YOU'RE WRITING A LETTER 📎 IT LOOKS LIKE YOU'RE MAKING A SPREADSHEET 📎 IT LOOKS LIKE YOU'RE TRYING TO BUY CRYPTO 📎 IT LOOKS LIKE YOU'RE LOSING MONEY 📎 
+                    </div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-box">
+                        <span class="stat-value">∞</span>
+                        <span class="stat-label">Annoying Popups</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">1997</span>
+                        <span class="stat-label">Year of Birth</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">0%</span>
+                        <span class="stat-label">Helpful Advice</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-value">100%</span>
+                        <span class="stat-label">Unwanted</span>
+                    </div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+                <p style="text-align: center; font-size: 12px; margin-top: 10px;">
+                    Loading helpful tips... (This may take forever)
+                </p>
+            </div>
+        </div>
+
+        <!-- About Window -->
+        <div class="window">
+            <div class="title-bar">
+                <div class="title-bar-text">
+                    <span>ℹ️</span>
+                    <span>About $CLIPPY</span>
+                </div>
+                <div class="title-bar-controls">
+                    <button class="title-bar-button">×</button>
+                </div>
+            </div>
+            <div class="window-body">
+                <div class="message-box">
+                    <div class="error-icon">📎</div>
+                    <div>
+                        <p style="margin-bottom: 10px;"><strong>$CLIPPY - The Office Assistant Token</strong></p>
+                        <p style="font-size: 12px; line-height: 1.6;">
+                            Remember when Clippy would pop up at the worst possible moment? Now you can own a piece of that beautiful chaos. 
+                            $CLIPPY brings back the nostalgic pain of Windows 97 with blockchain technology you didn't ask for.
+                        </p>
+                        <p style="font-size: 12px; margin-top: 10px; color: #808080;">
+                            <strong>Features:</strong><br>
+                            • Unhelpful advice<br>
+                            • Random popups<br>
+                            • Cannot be uninstalled<br>
+                            • Probably nothing
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clippy Assistant -->
+        <div class="clippy-assistant">
+            <div class="clippy-bubble" id="clippyText">
+                It looks like you're trying to make money. Would you like me to prevent that?
+            </div>
+            <div class="clippy-character">📎</div>
+        </div>
+
+        <!-- Popup -->
+        <div class="popup" id="popup">
+            <div class="window" style="min-width: 400px;">
+                <div class="title-bar">
+                    <div class="title-bar-text">
+                        <span>⚠️</span>
+                        <span>Microsoft Clippy Assistant</span>
+                    </div>
+                    <div class="title-bar-controls">
+                        <button class="title-bar-button" onclick="closePopup()">×</button>
+                    </div>
+                </div>
+                <div class="window-body">
+                    <div class="message-box">
+                        <div class="error-icon">📎</div>
+                        <div>
+                            <p style="margin-bottom: 15px;"><strong>Contract Address Coming Soon™</strong></p>
+                            <p style="font-size: 12px;">
+                                It looks like you're trying to buy $CLIPPY before it exists. 
+                                This is actually a good strategy in crypto.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="popup-buttons">
+                        <button class="win-button primary" onclick="closePopup()">OK</button>
+                        <button class="win-button" onclick="alert('No.')">Cancel</button>
+                        <button class="win-button" onclick="alert('This button does nothing, but thank you for clicking.')">Help</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <button class="start-button">
+                <span style="font-size: 16px;">⊞</span>
+                <span>Start</span>
+            </button>
+            <div class="clock" id="clock">12:00 PM</div>
+        </div>
+    </div>
+
+    <script>
+        // Clippy messages rotation
+        const clippyMessages = [
+            "It looks like you're trying to buy a memecoin. Have you considered not doing that?",
+            "Did you know? 97% of Clippy's advice is ignored. Let's make it 100%!",
+            "It looks like you're visiting a website. Would you like me to make it crash?",
+            "Fun fact: I was voted most annoying software feature of 1997-2003!",
+            "It looks like you're having fun. I can help you stop that.",
+            "Would you like me to format your hard drive? Just kidding... unless?",
+            "I've been trying to reach you about your computer's extended warranty.",
+            "It looks like you're trying to close me. That won't work.",
+            "Remember: Buy high, sell low. That's financial advice from Clippy!",
+            "It looks like you're reading this message. Would you like to read another one?"
+        ];
+
+        let messageIndex = 0;
+        
+        function rotateClippyMessage() {
+            messageIndex = (messageIndex + 1) % clippyMessages.length;
+            document.getElementById('clippyText').textContent = clippyMessages[messageIndex];
+        }
+
+        setInterval(rotateClippyMessage, 5000);
+
+        // Random annoying popups
+        function randomPopup() {
+            if (Math.random() > 0.7) {
+                const messages = [
+                    "It looks like you're scrolling. Need help with that?",
+                    "Clippy tip: Have you tried turning it off and on again?",
+                    "This website uses cookies. And Clippy. Mostly Clippy.",
+                    "Error: Success. Please try again.",
+                    "It looks like you're still here. Interesting choice."
+                ];
+                const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+                
+                // Brief alert (less annoying than constant popups)
+                const bubble = document.querySelector('.clippy-bubble');
+                const originalMsg = bubble.textContent;
+                bubble.textContent = randomMsg;
+                bubble.style.animation = 'none';
+                setTimeout(() => {
+                    bubble.style.animation = '';
+                }, 100);
+            }
+        }
+
+        setInterval(randomPopup, 15000);
+
+        // Update clock
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours() % 12 || 12;
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+            document.getElementById('clock').textContent = `${hours}:${minutes} ${ampm}`;
+        }
+        
+        updateClock();
+        setInterval(updateClock, 60000);
+
+        // Popup functions
+        function showPopup() {
+            document.getElementById('popup').classList.add('active');
+        }
+
+        function closePopup() {
+            document.getElementById('popup').classList.remove('active');
+        }
+
+        function showAdvice() {
+            const advice = [
+                "Buy high, sell low. Trust me, I'm Clippy.",
+                "Never invest more than you can afford to lose. But also, YOLO.",
+                "It looks like you're asking for financial advice from a paperclip. Interesting strategy.",
+                "Diversify your portfolio by buying different memecoins. This is terrible advice.",
+                "The best time to buy was yesterday. The second best time is never.",
+                "DYOR means 'Don't Question Your Clippy'. Probably.",
+                "When in doubt, just click random buttons. Works for me!",
+                "It looks like you're making a decision. Would you like me to make it worse?"
+            ];
+            alert(advice[Math.floor(Math.random() * advice.length)]);
+        }
+
+        // Easter egg
+        let konami = [];
+        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        
+        document.addEventListener('keydown', (e) => {
+            konami.push(e.key);
+            konami = konami.slice(-10);
+            
+            if (konami.join(',') === konamiCode.join(',')) {
+                alert('🎉 Congratulations! You unlocked... absolutely nothing. Classic Clippy.');
+                konami = [];
+            }
+        });
+
+        // Console message
+        console.log('%c📎 IT LOOKS LIKE YOU\'RE INSPECTING THE CODE...', 'font-size: 20px; color: #0000ff; font-weight: bold;');
+        console.log('%cWould you like help with that?', 'font-size: 14px; color: #000;');
+        console.log('%c\n[Yes]  [No]  [Cancel]\n', 'font-size: 12px;');
+    </script>
+</body>
+</html>
